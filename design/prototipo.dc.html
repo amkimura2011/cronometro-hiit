@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HIIT">
+<meta name="theme-color" content="#f3f2f2">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="_ds/classical-bc18eb88-769d-49e4-9637-4e003a6b6844/styles.css">
+<script src="_ds/classical-bc18eb88-769d-49e4-9637-4e003a6b6844/_ds_bundle.js"></script>
+<style>
+html,body{margin:0;background:#f3f2f2;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+a{color:#b68235}a:hover{color:#a06f24}
+button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="min-height:100dvh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+
+<sc-if value="{{ onTimer }}" hint-placeholder-val="{{ true }}">
+<main data-screen-label="Cronômetro" style="max-width:460px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 20px) 24px calc(env(safe-area-inset-bottom) + 24px)">
+  <header style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-accent-700)">{{ kicker }}</div>
+    <h1 style="margin:0;font-size:42px;font-weight:400;line-height:1.05;letter-spacing:-0.01em">{{ phaseTitle }}</h1>
+  </header>
+  <div style="display:grid;grid-template-columns:1fr 1px 1fr;align-items:center;margin-top:20px;padding:14px 0;border-top:1px solid var(--color-divider);border-bottom:1px solid var(--color-divider)">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="font-family:var(--font-heading);font-size:30px;line-height:1;font-variant-numeric:tabular-nums">{{ seriesStat }}</div>
+      <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700)">Séries</div>
+    </div>
+    <div style="height:36px;background:var(--color-divider)"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="font-family:var(--font-heading);font-size:30px;line-height:1;font-variant-numeric:tabular-nums">{{ cycleStat }}</div>
+      <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700)">Ciclos</div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:20px 0">
+    <div style="position:relative;width:min(84vw,46dvh,360px);aspect-ratio:1">
+      <svg viewBox="0 0 320 320" style="position:absolute;inset:0;width:100%;height:100%;display:block">
+        <sc-for list="{{ ticks }}" as="t" hint-placeholder-count="0">
+          <line x1="{{ t.x1 }}" y1="{{ t.y1 }}" x2="{{ t.x2 }}" y2="{{ t.y2 }}" stroke="var(--color-neutral-400)" stroke-width="{{ t.w }}"></line>
+        </sc-for>
+        <circle cx="160" cy="160" r="152" fill="none" stroke="var(--color-divider)" stroke-width="1"></circle>
+        <circle cx="160" cy="160" r="152" fill="none" stroke="var(--color-text)" stroke-width="7" stroke-linecap="round" stroke-dasharray="955.04" stroke-dashoffset="{{ outerOffset }}" transform="rotate(-90 160 160)"></circle>
+        <circle cx="160" cy="160" r="122" fill="none" stroke="var(--color-divider)" stroke-width="1"></circle>
+        <circle cx="160" cy="160" r="122" fill="none" stroke="{{ innerColor }}" stroke-width="7" stroke-linecap="round" stroke-dasharray="766.55" stroke-dashoffset="{{ innerOffset }}" transform="rotate(-90 160 160)"></circle>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+        <div style="color:var(--color-neutral-600);height:22px">
+          <sc-if value="{{ iconTimer }}" hint-placeholder-val="{{ true }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg></sc-if>
+          <sc-if value="{{ iconWork }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"></path><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"></path><path d="m21.5 21.5-1.4-1.4"></path><path d="M3.9 3.9 2.5 2.5"></path><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"></path></svg></sc-if>
+          <sc-if value="{{ iconRest }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg></sc-if>
+          <sc-if value="{{ iconInterval }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg></sc-if>
+        </div>
+        <div style="font-family:var(--font-heading);font-weight:400;font-size:{{ bigSize }};line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.02em">{{ bigNumber }}</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:6px">
+          <div style="font-size:19px;font-variant-numeric:tabular-nums;color:var(--color-neutral-800)">{{ subNumber }}</div>
+          <div style="font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-neutral-700)">{{ subLabel }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin:0 0 20px;text-align:center;font-style:italic;font-size:15px;color:var(--color-neutral-700);min-height:24px">{{ nextLine }}</p>
+
+  <div style="display:flex;align-items:center;justify-content:center;gap:28px">
+    <button aria-label="Parar" onClick="{{ stop }}" disabled="{{ stopDisabled }}" style="width:68px;height:68px;border-radius:50%;border:1px solid var(--color-divider);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:{{ stopOpacity }}" style-active="background:color-mix(in srgb, var(--color-text) 10%, transparent)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>
+    </button>
+    <button onClick="{{ primary }}" style="width:108px;height:108px;border-radius:50%;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent-700);font-family:var(--font-heading);font-weight:600;font-size:22px;cursor:pointer;box-shadow:0 0 0 5px var(--color-bg), 0 0 0 6px var(--color-divider)" style-active="background:color-mix(in srgb, var(--color-accent) 22%, transparent)">{{ primaryLabel }}</button>
+    <sc-if value="{{ showSettingsBtn }}" hint-placeholder-val="{{ true }}">
+      <button aria-label="Configurações" onClick="{{ openSettings }}" style="width:68px;height:68px;border-radius:50%;border:1px solid var(--color-divider);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-text) 10%, transparent)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+      </button>
+    </sc-if>
+    <sc-if value="{{ showSkipBtn }}">
+      <button aria-label="Pular" onClick="{{ skip }}" style="width:68px;height:68px;border-radius:50%;border:1px solid var(--color-divider);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-text) 10%, transparent)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" x2="19" y1="5" y2="19"></line></svg>
+      </button>
+    </sc-if>
+  </div>
+</main>
+</sc-if>
+
+<sc-if value="{{ showPrep }}">
+<div data-screen-label="Contagem regressiva" style="position:fixed;inset:0;z-index:20;background:var(--color-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 20px) 24px calc(env(safe-area-inset-bottom) + 32px)">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+    <div style="font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--color-accent-700)">Prepare-se</div>
+    <div style="font-family:var(--font-heading);font-weight:400;font-size:min(70vw,44dvh);line-height:0.9;color:var(--color-accent);font-variant-numeric:tabular-nums">{{ prepNumber }}</div>
+    <div style="width:48px;height:1px;background:var(--color-accent);margin:8px 0"></div>
+    <p style="margin:0;font-style:italic;font-size:16px;color:var(--color-neutral-700)">{{ prepNext }}</p>
+  </div>
+  <div style="display:flex;gap:12px">
+    <button class="btn btn-secondary" onClick="{{ stop }}" style="height:48px;min-width:120px;font-size:17px">Cancelar</button>
+    <button class="btn btn-primary" onClick="{{ primary }}" style="height:48px;min-width:120px;font-size:17px">{{ primaryLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ onSettings }}">
+<main data-screen-label="Configurações" style="max-width:460px;margin:0 auto;min-height:100dvh;padding:calc(env(safe-area-inset-top) + 12px) 20px calc(env(safe-area-inset-bottom) + 32px)">
+  <button onClick="{{ closeSettings }}" class="btn btn-ghost" style="height:44px;padding:0 8px 0 0;font-size:17px;margin-left:-4px">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>Cronômetro
+  </button>
+  <h1 style="margin:12px 0 4px;font-size:44px;font-weight:400">Configurações</h1>
+  <p style="margin:0 0 28px;font-style:italic;color:var(--color-neutral-700);text-wrap:pretty">{{ summary }}</p>
+
+  <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-accent-700);margin:0 0 8px 4px">Tempos</div>
+  <div style="border:1px solid var(--color-divider);border-radius:var(--radius-lg);overflow:hidden">
+    <button onClick="{{ openCountdown }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto 16px;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;border-bottom:1px solid var(--color-divider);text-align:left;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-linecap="round"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg>
+      <span style="font-size:16px">Contagem regressiva</span>
+      <span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ vCountdown }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"></path></svg>
+    </button>
+    <button onClick="{{ openWork }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto 16px;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;border-bottom:1px solid var(--color-divider);text-align:left;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.4 14.4 9.6 9.6"></path><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"></path><path d="m21.5 21.5-1.4-1.4"></path><path d="M3.9 3.9 2.5 2.5"></path><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"></path></svg>
+      <span style="font-size:16px">Exercício <span style="color:var(--color-neutral-700);font-style:italic;font-size:14px">· por série</span></span>
+      <span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ vWork }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"></path></svg>
+    </button>
+    <button onClick="{{ openRest }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto 16px;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;border-bottom:1px solid var(--color-divider);text-align:left;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+      <span style="font-size:16px">Recuperação <span style="color:var(--color-neutral-700);font-style:italic;font-size:14px">· entre séries</span></span>
+      <span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ vRest }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"></path></svg>
+    </button>
+    <button onClick="{{ openCycleRest }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto 16px;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;text-align:left;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>
+      <span style="font-size:16px">Intervalo entre ciclos</span>
+      <span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ vCycleRest }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"></path></svg>
+    </button>
+  </div>
+
+  <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-accent-700);margin:28px 0 8px 4px">Estrutura</div>
+  <div style="border:1px solid var(--color-divider);border-radius:var(--radius-lg);overflow:hidden">
+    <button onClick="{{ openSeries }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto 16px;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;border-bottom:1px solid var(--color-divider);text-align:left;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"></path></svg>
+      <span style="font-size:16px">Séries <span style="color:var(--color-neutral-700);font-style:italic;font-size:14px">· por ciclo</span></span>
+      <span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ vSeries }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"></path></svg>
+    </button>
+    <button onClick="{{ openCycles }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto 16px;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;text-align:left;cursor:pointer" style-active="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"></path><path d="M3 11v-1a4 4 0 0 1 4-4h14"></path><path d="m7 22-4-4 4-4"></path><path d="M21 13v1a4 4 0 0 1-4 4H3"></path></svg>
+      <span style="font-size:16px">Ciclos</span>
+      <span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ vCycles }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"></path></svg>
+    </button>
+  </div>
+
+  <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-accent-700);margin:28px 0 8px 4px">Preferências</div>
+  <div style="border:1px solid var(--color-divider);border-radius:var(--radius-lg);overflow:hidden">
+    <button onClick="{{ toggleSound }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;border-bottom:1px solid var(--color-divider);text-align:left;cursor:pointer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path><path d="M16 9a5 5 0 0 1 0 6"></path><path d="M19.364 18.364a9 9 0 0 0 0-12.728"></path></svg>
+      <span style="font-size:16px">Sinais sonoros</span>
+      <span style="width:46px;height:28px;border-radius:14px;border:1px solid {{ soundBorder }};position:relative;display:block"><span style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:{{ soundKnob }};transform:translateX({{ soundX }});transition:transform .2s"></span></span>
+    </button>
+    <button onClick="{{ toggleWake }}" style="width:100%;display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:14px;min-height:56px;padding:0 16px;background:transparent;border:0;text-align:left;cursor:pointer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+      <span style="font-size:16px">Manter tela acesa</span>
+      <span style="width:46px;height:28px;border-radius:14px;border:1px solid {{ wakeBorder }};position:relative;display:block"><span style="position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:{{ wakeKnob }};transform:translateX({{ wakeX }});transition:transform .2s"></span></span>
+    </button>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:32px;padding-top:16px;border-top:1px solid var(--color-divider)">
+    <span style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-neutral-700)">Tempo total do treino</span>
+    <span style="font-family:var(--font-heading);font-size:30px;font-variant-numeric:tabular-nums">{{ totalLabel }}</span>
+  </div>
+</main>
+</sc-if>
+
+<div onClick="{{ closeSheet }}" style="position:fixed;inset:0;z-index:30;background:color-mix(in srgb, var(--color-neutral-900) 35%, transparent);opacity:{{ backdropOpacity }};pointer-events:{{ backdropPointer }};transition:opacity .25s"></div>
+<div style="position:fixed;left:50%;bottom:0;z-index:31;width:100%;max-width:460px;background:var(--color-bg);border-top:1px solid var(--color-divider);border-radius:var(--radius-lg) var(--radius-lg) 0 0;box-shadow:var(--shadow-lg);padding:10px 20px calc(env(safe-area-inset-bottom) + 20px);transform:translate(-50%, {{ sheetY }});transition:transform .3s cubic-bezier(.2,.8,.2,1)">
+  <div style="width:36px;height:1px;background:var(--color-neutral-500);margin:6px auto 16px"></div>
+  <div style="text-align:center">
+    <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-accent-700)">{{ sheetKicker }}</div>
+    <h2 style="margin:4px 0 0;font-size:32px;font-weight:400">{{ sheetTitle }}</h2>
+  </div>
+  <div style="position:relative;display:flex;gap:8px;margin:16px 0 20px">
+    <div style="position:absolute;left:0;right:0;top:88px;height:44px;border-top:1px solid var(--color-accent);border-bottom:1px solid var(--color-accent);pointer-events:none"></div>
+    <sc-for list="{{ columns }}" as="col" hint-placeholder-count="2">
+      <div ref="{{ col.ref }}" onScroll="{{ col.onScroll }}" style="flex:1;height:220px;overflow-y:auto;scroll-snap-type:y mandatory;padding:88px 0;scrollbar-width:none;-webkit-mask-image:linear-gradient(transparent, #000 35%, #000 65%, transparent);mask-image:linear-gradient(transparent, #000 35%, #000 65%, transparent)">
+        <sc-for list="{{ col.items }}" as="it" hint-placeholder-count="5">
+          <div style="height:44px;display:flex;align-items:baseline;justify-content:center;gap:6px;padding-top:6px;scroll-snap-align:center;opacity:{{ it.op }}">
+            <span style="font-family:var(--font-heading);font-size:28px;line-height:1;font-variant-numeric:tabular-nums">{{ it.label }}</span>
+            <span style="font-size:13px;color:var(--color-neutral-700)">{{ it.unit }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:flex;gap:12px">
+    <button class="btn btn-secondary" onClick="{{ closeSheet }}" style="flex:1;height:48px;font-size:17px">Cancelar</button>
+    <button class="btn btn-primary" onClick="{{ confirmSheet }}" style="flex:1;height:48px;font-size:17px">Definir</button>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;outerRing&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;treino&quot;,&quot;ciclo&quot;],&quot;default&quot;:&quot;treino&quot;,&quot;tsType&quot;:&quot;'treino'|'ciclo'&quot;,&quot;section&quot;:&quot;Medidores&quot;},&quot;prepFullscreen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contagem&quot;},&quot;showNext&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Medidores&quot;}}">
+class Component extends DCLogic {
+  DEFAULT_CFG = { countdown: 10, work: 45, rest: 15, series: 8, cycles: 4, cycleRest: 90 };
+  DEFS = {
+    countdown: { label: 'Contagem regressiva', kicker: 'Antes de começar', kind: 'time', min: 0 },
+    work: { label: 'Exercício', kicker: 'Duração de cada série', kind: 'time', min: 1 },
+    rest: { label: 'Recuperação', kicker: 'Descanso entre séries', kind: 'time', min: 0 },
+    cycleRest: { label: 'Intervalo entre ciclos', kicker: 'Descanso entre ciclos', kind: 'time', min: 0 },
+    series: { label: 'Séries', kicker: 'Por ciclo', kind: 'count', from: 1, to: 30, unit: 'séries' },
+    cycles: { label: 'Ciclos', kicker: 'Repetições do bloco', kind: 'count', from: 1, to: 20, unit: 'ciclos' },
+  };
+  TITLES = { prep: 'Preparar', work: 'Exercício', rest: 'Recuperação', interval: 'Intervalo entre ciclos' };
+  COLORS = { prep: 'var(--color-accent)', work: 'var(--color-accent)', rest: 'var(--color-neutral-500)', interval: 'var(--color-accent-700)' };
+  colRefs = [React.createRef(), React.createRef()];
+
+  load(k, d) { try { return { ...d, ...(JSON.parse(localStorage.getItem(k)) || {}) }; } catch (e) { return d; } }
+  save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  state = {
+    screen: 'timer',
+    cfg: this.load('hiit.cfg', this.DEFAULT_CFG),
+    prefs: this.load('hiit.prefs', { sound: true, wake: true }),
+    run: { status: 'idle', idx: 0, acc: 0, t0: 0 },
+    now: Date.now(), sheet: null, sheetVals: [0, 0],
+  };
+
+  componentDidMount() {
+    this.iv = setInterval(() => this.tick(), 100);
+    this.onVis = () => { if (document.visibilityState === 'visible' && this.state.run.status === 'running') this.lock(); };
+    document.addEventListener('visibilitychange', this.onVis);
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+  componentWillUnmount() { clearInterval(this.iv); document.removeEventListener('visibilitychange', this.onVis); this.unlock(); }
+
+  phases(cfg) {
+    const key = JSON.stringify(cfg);
+    if (this._pk === key) return this._ph;
+    const p = [];
+    if (cfg.countdown > 0) p.push({ type: 'prep', dur: cfg.countdown, s: 0, c: 0 });
+    for (let c = 1; c <= cfg.cycles; c++) {
+      for (let s = 1; s <= cfg.series; s++) {
+        p.push({ type: 'work', dur: cfg.work, s, c });
+        if (s < cfg.series && cfg.rest > 0) p.push({ type: 'rest', dur: cfg.rest, s, c });
+      }
+      if (c < cfg.cycles && cfg.cycleRest > 0) p.push({ type: 'interval', dur: cfg.cycleRest, s: cfg.series, c });
+    }
+    this._pk = key; this._ph = p; return p;
+  }
+
+  // audio
+  audio() { if (!this.ac) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ac = new AC(); } if (this.ac && this.ac.state === 'suspended') this.ac.resume(); this.loadApplause(); }
+  beep(f, d) {
+    if (!this.state.prefs.sound || !this.ac) return;
+    const t = this.ac.currentTime, o = this.ac.createOscillator(), g = this.ac.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g).connect(this.ac.destination); o.start(t); o.stop(t + d + 0.05);
+  }
+  phaseBeep(type) { if (type === 'work') this.beep(1046, 0.5); else if (type === 'done') this.celebrate(); else this.beep(523, 0.45); }
+
+  // fanfarra ascendente + aplausos sintetizados (rajadas de ruído filtrado)
+  celebrate() {
+    if (!this.state.prefs.sound || !this.ac) return;
+    [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.beep(f, i === 3 ? 0.9 : 0.18), i * 150));
+    if (this.applause) {
+      const s = this.ac.createBufferSource(), g = this.ac.createGain();
+      const at = this.ac.currentTime + 0.7, len = Math.min(this.applause.duration, 5);
+      s.buffer = this.applause; g.gain.setValueAtTime(0.9, at); g.gain.setValueAtTime(0.9, at + len - 1); g.gain.linearRampToValueAtTime(0.0001, at + len);
+      s.connect(g).connect(this.ac.destination); s.start(at); s.stop(at + len + 0.05);
+    }
+  }
+  // gravação real de aplausos em sounds/aplausos.mp3 (carregada no primeiro toque)
+  loadApplause() {
+    if (this._applauseLoading || !this.ac) return; this._applauseLoading = true;
+    fetch('sounds/aplausos.mp3').then(r => r.ok ? r.arrayBuffer() : Promise.reject())
+      .then(b => new Promise((res, rej) => this.ac.decodeAudioData(b, res, rej)))
+      .then(buf => { this.applause = buf; }).catch(() => { this._applauseLoading = false; });
+  }
+
+  async lock() { if (!this.state.prefs.wake || !navigator.wakeLock) return; try { this.wl = await navigator.wakeLock.request('screen'); } catch (e) {} }
+  unlock() { try { this.wl && this.wl.release(); } catch (e) {} this.wl = null; }
+
+  tick() {
+    const { run, cfg } = this.state;
+    if (run.status !== 'running') return;
+    const ph = this.phases(cfg), now = Date.now();
+    let idx = run.idx, el = run.acc + now - run.t0, changed = false;
+    while (idx < ph.length && el >= ph[idx].dur * 1000) { el -= ph[idx].dur * 1000; idx++; changed = true; }
+    if (idx >= ph.length) { this.phaseBeep('done'); this.unlock(); this.setState({ now, run: { status: 'done', idx: ph.length - 1, acc: 0, t0: 0 } }); return; }
+    const next = changed ? { status: 'running', idx, acc: 0, t0: now - el } : run;
+    if (changed) { this.phaseBeep(ph[idx].type); this.lastSec = null; }
+    const remSec = Math.ceil((ph[idx].dur * 1000 - el) / 1000);
+    if (remSec <= 3 && remSec >= 1 && remSec !== this.lastSec && ph[idx].dur > 3) { this.beep(880, 0.12); }
+    this.lastSec = remSec;
+    this.setState({ now, run: next });
+  }
+
+  primary = () => {
+    const { run } = this.state, now = Date.now();
+    this.audio();
+    if (run.status === 'idle' || run.status === 'done') {
+      const ph = this.phases(this.state.cfg);
+      this.phaseBeep(ph[0].type); this.lastSec = null; this.lock();
+      this.setState({ now, run: { status: 'running', idx: 0, acc: 0, t0: now } });
+    } else if (run.status === 'running') {
+      this.unlock();
+      this.setState({ now, run: { ...run, status: 'paused', acc: run.acc + now - run.t0 } });
+    } else {
+      this.lock();
+      this.setState({ now, run: { ...run, status: 'running', t0: now } });
+    }
+  };
+  stop = () => { this.unlock(); this.setState({ run: { status: 'idle', idx: 0, acc: 0, t0: 0 } }); };
+  skip = () => {
+    const { run, cfg } = this.state, ph = this.phases(cfg), now = Date.now();
+    if (run.idx + 1 >= ph.length) { this.phaseBeep('done'); this.unlock(); this.setState({ run: { status: 'done', idx: ph.length - 1, acc: 0, t0: 0 } }); return; }
+    this.phaseBeep(ph[run.idx + 1].type); this.lastSec = null;
+    this.setState({ now, run: { status: run.status, idx: run.idx + 1, acc: 0, t0: now } });
+  };
+
+  openSheet(key) {
+    const d = this.DEFS[key], v = this.state.cfg[key];
+    const vals = d.kind === 'time' ? [Math.floor(v / 60), v % 60] : [v - d.from, 0];
+    this.setState({ sheet: key, sheetVals: vals }, () => requestAnimationFrame(() => {
+      this.colRefs.forEach((r, i) => { if (r.current) r.current.scrollTop = vals[i] * 44; });
+    }));
+  }
+  onColScroll(ci, e) {
+    const d = this.DEFS[this.state.sheet]; if (!d) return;
+    const max = d.kind === 'time' ? 59 : d.to - d.from;
+    const i = Math.max(0, Math.min(max, Math.round(e.currentTarget.scrollTop / 44)));
+    if (i !== this.state.sheetVals[ci]) { const sv = [...this.state.sheetVals]; sv[ci] = i; this.setState({ sheetVals: sv }); }
+  }
+  confirmSheet = () => {
+    const key = this.state.sheet, d = this.DEFS[key], sv = this.state.sheetVals;
+    let v = d.kind === 'time' ? sv[0] * 60 + sv[1] : d.from + sv[0];
+    if (d.kind === 'time') v = Math.max(d.min, v);
+    const cfg = { ...this.state.cfg, [key]: v };
+    this.save('hiit.cfg', cfg);
+    this.setState({ cfg, sheet: null, run: { status: 'idle', idx: 0, acc: 0, t0: 0 } });
+  };
+
+  togglePref(k) { const prefs = { ...this.state.prefs, [k]: !this.state.prefs[k] }; this.save('hiit.prefs', prefs); this.setState({ prefs }); }
+
+  dur(s) { if (s < 60) return `${s} s`; const m = Math.floor(s / 60), r = s % 60; return r ? `${m} min ${r} s` : `${m} min`; }
+  mmss(s) { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60, p = n => String(n).padStart(2, '0'); return h ? `${h}:${p(m)}:${p(r)}` : `${p(m)}:${p(r)}`; }
+
+  ticks() {
+    if (this._ticks) return this._ticks;
+    const t = [];
+    for (let i = 0; i < 60; i++) {
+      const a = (i * 6 - 90) * Math.PI / 180, major = i % 5 === 0, r1 = major ? 131 : 135, r2 = 141;
+      t.push({ x1: 160 + r1 * Math.cos(a), y1: 160 + r1 * Math.sin(a), x2: 160 + r2 * Math.cos(a), y2: 160 + r2 * Math.sin(a), w: major ? 1.2 : 0.6 });
+    }
+    return (this._ticks = t);
+  }
+
+  renderVals() {
+    const { cfg, run, now, prefs, sheet, sheetVals, screen } = this.state;
+    const outerMode = this.props.outerRing ?? 'treino';
+    const prepFull = this.props.prepFullscreen ?? true;
+    const ph = this.phases(cfg);
+    const total = ph.reduce((a, p) => a + p.dur, 0);
+    const idle = run.status === 'idle', done = run.status === 'done', active = !idle && !done;
+    const cur = ph[run.idx] || ph[0];
+    const el = active ? (run.status === 'running' ? run.acc + now - run.t0 : run.acc) / 1000 : 0;
+    const rem = Math.max(0, cur.dur - el);
+    const after = ph.slice(run.idx + 1).reduce((a, p) => a + p.dur, 0);
+    const totalRem = done ? 0 : idle ? total : rem + after;
+
+    let outerFrac = 0;
+    if (active) {
+      if (outerMode === 'ciclo' && cur.c > 0) {
+        const cp = ph.map((p, i) => ({ p, i })).filter(x => x.p.c === cur.c && x.p.type !== 'interval' && x.p.type !== 'prep');
+        const ct = cp.reduce((a, x) => a + x.p.dur, 0);
+        const cRem = cur.type === 'interval' ? 0 : cp.filter(x => x.i > run.idx).reduce((a, x) => a + x.p.dur, 0) + rem;
+        outerFrac = ct ? cRem / ct : 0;
+      } else outerFrac = total ? totalRem / total : 0;
+    }
+    const innerFrac = done ? 0 : active ? rem / cur.dur : 0;
+    const nextP = ph[run.idx + 1];
+
+    const def = sheet ? this.DEFS[sheet] : null;
+    let columns = [];
+    if (def) {
+      const mk = (vals, unit, sel) => vals.map((v, i) => ({ label: String(v), unit, op: Math.max(0.15, 1 - Math.abs(i - sel) * 0.28) }));
+      const r60 = Array.from({ length: 60 }, (_, i) => i);
+      columns = def.kind === 'time'
+        ? [{ ref: this.colRefs[0], onScroll: e => this.onColScroll(0, e), items: mk(r60, 'min', sheetVals[0]) },
+           { ref: this.colRefs[1], onScroll: e => this.onColScroll(1, e), items: mk(r60, 's', sheetVals[1]) }]
+        : [{ ref: this.colRefs[0], onScroll: e => this.onColScroll(0, e), items: mk(Array.from({ length: def.to - def.from + 1 }, (_, i) => def.from + i), def.unit, sheetVals[0]) }];
+    }
+
+    const tog = on => ({ b: on ? 'var(--color-accent)' : 'var(--color-neutral-400)', k: on ? 'var(--color-accent)' : 'var(--color-neutral-400)', x: on ? '18px' : '0px' });
+    const ts = tog(prefs.sound), tw = tog(prefs.wake);
+
+    return {
+      onTimer: screen === 'timer', onSettings: screen === 'settings',
+      kicker: idle ? 'Cronômetro intervalado' : done ? 'Treino concluído' : run.status === 'paused' ? 'Em pausa' : cur.type === 'prep' ? 'Contagem regressiva' : `Ciclo ${cur.c} · Série ${cur.s}`,
+      phaseTitle: idle ? 'Pronto' : done ? 'Concluído' : this.TITLES[cur.type],
+      seriesStat: idle || done || cur.type === 'prep' ? `—/${cfg.series}` : `${cur.s}/${cfg.series}`,
+      cycleStat: idle || cur.type === 'prep' ? `—/${cfg.cycles}` : done ? `${cfg.cycles}/${cfg.cycles}` : `${cur.c}/${cfg.cycles}`,
+      ticks: this.ticks(),
+      outerOffset: 955.04 * (1 - outerFrac), innerOffset: 766.55 * (1 - innerFrac),
+      innerColor: this.COLORS[cur.type],
+      iconTimer: idle || done || cur.type === 'prep', iconWork: active && cur.type === 'work', iconRest: active && cur.type === 'rest', iconInterval: active && cur.type === 'interval',
+      bigNumber: idle ? this.mmss(total) : done ? 'Fim' : String(Math.ceil(rem - 0.001)).padStart(2, '0'),
+      bigSize: active ? 'clamp(80px, 26vw, 124px)' : 'clamp(56px, 17vw, 80px)',
+      subNumber: idle ? `${cfg.series} × ${cfg.cycles}` : done ? this.mmss(total) : this.mmss(totalRem),
+      subLabel: idle ? 'séries × ciclos' : done ? 'de treino' : 'restante',
+      nextLine: idle ? `${this.dur(cfg.work)} de esforço, ${this.dur(cfg.rest)} de recuperação` : done ? 'Bom trabalho.' : (this.props.showNext ?? true) ? (nextP ? `A seguir — ${this.TITLES[nextP.type]}, ${this.dur(nextP.dur)}` : 'Último trecho') : '',
+      primary: this.primary, stop: this.stop, skip: this.skip,
+      primaryLabel: idle ? 'Iniciar' : done ? 'Recomeçar' : run.status === 'running' ? 'Pausar' : 'Retomar',
+      stopDisabled: idle, stopOpacity: idle ? 0.45 : 1,
+      showSettingsBtn: idle || done, showSkipBtn: active,
+      showPrep: prepFull && active && cur.type === 'prep',
+      prepNumber: String(Math.ceil(rem - 0.001)),
+      prepNext: nextP ? `Em seguida — ${this.TITLES[nextP.type]}, ${this.dur(nextP.dur)}` : '',
+      openSettings: () => this.setState({ screen: 'settings', run: { status: 'idle', idx: 0, acc: 0, t0: 0 } }),
+      closeSettings: () => this.setState({ screen: 'timer' }),
+      summary: `${cfg.cycles} ${cfg.cycles > 1 ? 'ciclos' : 'ciclo'} de ${cfg.series} ${cfg.series > 1 ? 'séries' : 'série'}: ${this.dur(cfg.work)} de esforço e ${this.dur(cfg.rest)} de recuperação, com ${this.dur(cfg.cycleRest)} entre ciclos.`,
+      vCountdown: this.dur(cfg.countdown), vWork: this.dur(cfg.work), vRest: this.dur(cfg.rest), vCycleRest: this.dur(cfg.cycleRest),
+      vSeries: String(cfg.series), vCycles: String(cfg.cycles),
+      openCountdown: () => this.openSheet('countdown'), openWork: () => this.openSheet('work'), openRest: () => this.openSheet('rest'),
+      openCycleRest: () => this.openSheet('cycleRest'), openSeries: () => this.openSheet('series'), openCycles: () => this.openSheet('cycles'),
+      toggleSound: () => this.togglePref('sound'), toggleWake: () => this.togglePref('wake'),
+      soundBorder: ts.b, soundKnob: ts.k, soundX: ts.x, wakeBorder: tw.b, wakeKnob: tw.k, wakeX: tw.x,
+      totalLabel: this.mmss(total),
+      backdropOpacity: sheet ? 1 : 0, backdropPointer: sheet ? 'auto' : 'none', sheetY: sheet ? '0%' : '110%',
+      sheetKicker: def ? def.kicker : '', sheetTitle: def ? def.label : '',
+      columns, closeSheet: () => this.setState({ sheet: null }), confirmSheet: this.confirmSheet,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { beep, celebrate, unlock as unlockAudio } from './audio'
+import { TONE, beep, celebrate, unlock as unlockAudio } from './audio'
 import { buildPhases, type Cfg, type PhaseType, type Prefs } from './hiit'
 
 export type RunStatus = 'idle' | 'running' | 'paused' | 'done'
@@ -33,9 +33,9 @@ export function useHiitTimer(cfg: Cfg, prefs: Prefs) {
 
   const phaseBeep = useCallback((type: PhaseType | 'done') => {
     if (!prefsRef.current.sound) return
-    if (type === 'work') beep(1046, 0.5)
+    if (type === 'work') beep(...TONE.work)
     else if (type === 'done') celebrate()
-    else beep(523, 0.45)
+    else beep(...TONE.rest)
   }, [])
 
   const lock = useCallback(async () => {
@@ -86,7 +86,7 @@ export function useHiitTimer(cfg: Cfg, prefs: Prefs) {
       // bipe curto nos últimos 3 s de cada fase
       const remSec = Math.ceil((ph[idx].dur * 1000 - el) / 1000)
       if (remSec <= 3 && remSec >= 1 && remSec !== lastSec.current && ph[idx].dur > 3 && prefsRef.current.sound) {
-        beep(880, 0.12)
+        beep(...TONE.tick)
       }
       lastSec.current = remSec
       setNow(t)

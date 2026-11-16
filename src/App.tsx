@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { VolumeX } from 'lucide-react'
+import { unlock, watchAudio } from './audio'
 import { PrepOverlay } from './PrepOverlay'
 import { SettingsScreen } from './SettingsScreen'
 import { TimerScreen } from './TimerScreen'
@@ -12,6 +14,9 @@ export default function App() {
   const [prefs, setPrefs] = useState<Prefs>(() => load('hiit.prefs', DEFAULT_PREFS))
   const [sheet, setSheet] = useState<CfgKey | null>(null)
   const { phases, run, now, primary, stop, skip } = useHiitTimer(cfg, prefs)
+  // som caiu ao voltar de outro app e o iOS exige um toque para religar
+  const [muted, setMuted] = useState(false)
+  useEffect(() => watchAudio(setMuted), [])
 
   const total = phases.reduce((a, p) => a + p.dur, 0)
   const cur = phases[run.idx] ?? phases[0]
@@ -58,6 +63,13 @@ export default function App() {
           onCancel={stop}
           onPrimary={primary}
         />
+      )}
+
+      {muted && prefs.sound && active && (
+        <button className="sound-hint" onClick={unlock}>
+          <VolumeX size={18} strokeWidth={1.5} />
+          Toque para reativar o som
+        </button>
       )}
 
       <WheelSheet field={sheet} value={sheet ? cfg[sheet] : 0} onCancel={() => setSheet(null)} onConfirm={confirmSheet} />

@@ -1,19 +1,79 @@
 // Sinais sonoros via Web Audio. No iOS o contexto só destrava dentro de um toque,
-// por isso unlock() é chamado no botão Iniciar/Pausar.
+// por isso unlock() é chamado no botão Iniciar/Pausar e em qualquer toque quando o som cai.
 
 let ac: AudioContext | null = null
 let applause: AudioBuffer | null = null
 let applauseLoading = false
 
+// true quando o som caiu e só um toque consegue religar (o iOS exige gesto)
+let needsTouch = false
+const listeners = new Set<(muted: boolean) => void>()
+function setNeedsTouch(v: boolean) {
+  if (needsTouch === v) return
+  needsTouch = v
+  listeners.forEach((f) => f(v))
+}
+
 const APPLAUSE_URL = `${import.meta.env.BASE_URL}sounds/aplausos.mp3`
 
+function newContext(): AudioContext | null {
+  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  return AC ? new AC() : null
+}
+
+// Chamado dentro de um toque. Se o som caiu, troca por um contexto novo: o iOS às vezes
+// deixa o antigo "running" e mudo depois de outro app usar o áudio, e resume() não o recupera.
 export function unlock() {
-  if (!ac) {
-    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-    if (AC) ac = new AC()
+  if (!ac || needsTouch) {
+    void ac?.close().catch(() => {})
+    ac = newContext()
   }
-  if (ac?.state === 'suspended') void ac.resume()
+  // 'interrupted' é estado próprio do iOS (outro app tomou o áudio), além de 'suspended'
+  if (ac && ac.state !== 'running') void ac.resume().catch(() => {})
+  setNeedsTouch(false)
   loadApplause()
+}
+
+// Ao voltar de outro app: tenta religar sem toque, com um contexto novo.
+// Se o iOS não deixar (contexto novo não sobe sem gesto), fica com o antigo e pede um toque.
+function revive() {
+  if (!ac) return
+  const old = ac
+  if (old.state !== 'running') void old.resume().catch(() => {})
+  const fresh = newContext()
+  if (!fresh) return
+  void fresh.resume().catch(() => {})
+  setTimeout(() => {
+    if (ac !== old) return void fresh.close().catch(() => {}) // um toque já trocou o contexto
+    if (fresh.state === 'running') {
+      ac = fresh
+      void old.close().catch(() => {})
+      setNeedsTouch(false)
+    } else {
+      void fresh.close().catch(() => {})
+      setNeedsTouch(true)
+    }
+  }, 300)
+}
+
+// Liga a recuperação automática. Devolve a função de desligar.
+export function watchAudio(onMuted: (muted: boolean) => void) {
+  const onVis = () => {
+    if (document.visibilityState === 'visible') revive()
+  }
+  const onTouch = () => {
+    if (needsTouch || (ac && ac.state !== 'running')) unlock()
+  }
+  listeners.add(onMuted)
+  document.addEventListener('visibilitychange', onVis)
+  window.addEventListener('pageshow', onVis)
+  document.addEventListener('pointerdown', onTouch, true)
+  return () => {
+    listeners.delete(onMuted)
+    document.removeEventListener('visibilitychange', onVis)
+    window.removeEventListener('pageshow', onVis)
+    document.removeEventListener('pointerdown', onTouch, true)
+  }
 }
 
 function loadApplause() {
@@ -44,6 +104,7 @@ export const TONE = {
 
 export function beep(freq: number, len: number) {
   if (!ac) return
+  if (ac.state !== 'running') void ac.resume().catch(() => {})
   const t = ac.currentTime
   const o = ac.createOscillator()
   const g = ac.createGain()
